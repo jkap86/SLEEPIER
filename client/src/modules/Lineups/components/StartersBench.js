@@ -86,33 +86,104 @@ const StartersBench = ({ secondaryTable }) => {
                 filters.draftClass === 'All' || parseInt(filters.draftClass) === (state.league_season - allplayers[parseInt(player_id)]?.years_exp)
             )
         ))
-        ?.sort((a, b) => filterLeagues(playerLineupDict[b][sortBy], type1, type2)?.filter(l => !playoffs || (
-            state.week >= l.settings.playoff_week_start
-            && l.settings.playoff_teams >= l.userRoster.rank
-        )).length - filterLeagues(playerLineupDict[a][sortBy], type1, type2)?.filter(l => !playoffs || (
-            state.week >= l.settings.playoff_week_start
-            && l.settings.playoff_teams >= l.userRoster.rank
-        )).length)
+        ?.sort((a, b) => filterLeagues(playerLineupDict[b][sortBy], type1, type2)
+            ?.filter(l => !playoffs || (
+                l.settings.winners_bracket
+                    .find(
+                        wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                            && (
+                                wb.t1 === l.userRoster.roster_id
+                                || wb.t2 === l.userRoster.roster_id
+                            )
+                            && (
+                                !wb.p
+                                || wb.p === 1
+                            )
+                    )
+
+            ))?.length
+            -
+            filterLeagues(playerLineupDict[a][sortBy], type1, type2)
+                ?.filter(l => !playoffs || (
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
+
+                ))?.length
+        )
         ?.map(player_id => {
             const start = filterLeagues(playerLineupDict[player_id]?.start || [], type1, type2)
                 ?.filter(l => !playoffs || (
-                    state.week >= l.settings.playoff_week_start
-                    && l.settings.playoff_teams >= l.userRoster.rank
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
+
                 ))
             const bench = filterLeagues(playerLineupDict[player_id]?.bench || [], type1, type2)
                 ?.filter(l => !playoffs || (
-                    state.week >= l.settings.playoff_week_start
-                    && l.settings.playoff_teams >= l.userRoster.rank
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
+
                 ))
             const start_opp = filterLeagues(playerLineupDict[player_id]?.start_opp || [], type1, type2)
                 ?.filter(l => !playoffs || (
-                    state.week >= l.settings.playoff_week_start
-                    && l.settings.playoff_teams >= l.userRoster.rank
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
+
                 ))
             const bench_opp = filterLeagues(playerLineupDict[player_id]?.bench_opp || [], type1, type2)
                 ?.filter(l => !playoffs || (
-                    state.week >= l.settings.playoff_week_start
-                    && l.settings.playoff_teams >= l.userRoster.rank
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
+
                 ))
 
             const ppr_projection = projections?.[week]?.[player_id]?.projection?.pts_ppr
