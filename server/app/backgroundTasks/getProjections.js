@@ -36,21 +36,21 @@ module.exports = async (app) => {
 
         const projections_json = fs.readFileSync('./projections.json', 'utf-8')
 
-        const limit = new Date().getMinutes() < 55
+        const limit = new Date().getMinutes() < 15
             ? 19
             : week + 1
 
         let projections = JSON.parse(projections_json);
-
+        const updated_projections = []
         for (let i = 1; i < limit; i++) {
             console.log({ WEEK: i })
             if (i >= week || !JSON.parse(projections_json).find(p => p.week === i)) {
 
-                projections = projections.filter(p => p.week !== i);
+                
 
                 const projections_to_update = JSON.parse(projections_json).filter(p => p.week === i);
-
-                const updated_projections = []
+                projections = projections.filter(p => !projections_to_update.find(p2 => p.week === p2.week && p.player_id === p2.player_id))
+                
                 try {
                     for (const position of ['QB', 'RB', 'WR', 'TE']) {
                         const projections_week = await axios.get(`https://api.sleeper.com/projections/nfl/${season}/${i}?season_type=regular&position[]=${position}&order_by=ppr`)
@@ -86,13 +86,12 @@ module.exports = async (app) => {
                 }
                 console.log({ [i]: updated_projections.length })
 
-                projections.push(...updated_projections)
 
 
             }
         }
         console.log('Projections Update Complete')
-        fs.writeFileSync('./projections.json', JSON.stringify(projections))
+        fs.writeFileSync('./projections.json', JSON.stringify([...projections, ...updated_projections]))
     }
 
     if (process.env.HEROKU) {
