@@ -36,17 +36,17 @@ module.exports = async (app) => {
 
         const projections_json = fs.readFileSync('./projections.json', 'utf-8')
 
-        const limit = new Date().getMinutes() < 15
+        const limit = new Date().getMinutes() < 55
             ? 19
             : week + 1
 
-        const projections = JSON.parse(projections_json);
+        let projections = JSON.parse(projections_json);
 
         for (let i = 1; i < limit; i++) {
             console.log({ WEEK: i })
             if (i >= week || !JSON.parse(projections_json).find(p => p.week === i)) {
 
-
+                projections = projections.filter(p => p.week !== i);
 
                 const projections_to_update = JSON.parse(projections_json).filter(p => p.week === i);
 
@@ -64,14 +64,15 @@ module.exports = async (app) => {
                                 if (projection_object) {
                                     updated_projections.push({
                                         ...projection_object,
+                                        injury_status: pw.player.injury_status || '',
                                         projection: pw.stats || {}
                                     })
                                 } else {
                                     updated_projections.push({
                                         week: i,
                                         player_id: pw.player_id,
-                                        injury_status: pw.player.injury_status,
-                                        projection: pw.stats,
+                                        injury_status: pw.player.injury_status || '',
+                                        projection: pw.stats || {},
                                     })
                                 }
                             })
