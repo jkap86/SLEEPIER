@@ -36,14 +36,7 @@ export const fetchMatchups = () => {
                         } else {
                             const key_week = parseInt(key.split('_')[1])
 
-                            if (
-                                (
-                                    key_week < league.settings.playoff_week_start
-                                    || league.settings.playoff_week_start === 0
-                                ) && (
-                                    key_week >= league.settings.start_week
-                                )
-                            ) {
+                            if (key_week >= league.settings.start_week) {
                                 if (
                                     key_week + 1 < display_week
                                     || (
@@ -103,7 +96,7 @@ export const fetchMatchups = () => {
                 }
             })
 
-            console.log({all_matchups_to_update})
+        console.log({ all_matchups_to_update })
         if (all_matchups_to_update?.length > 0) {
             try {
                 dispatch({ type: 'FETCH_MATCHUPS_START' });
@@ -129,7 +122,7 @@ export const syncLeague = (league_id, user_id, username, week) => {
         dispatch({ type: 'SYNC_LEAGUE_START' });
 
         const state = getState();
-        const { common} = state;
+        const { common } = state;
 
         try {
             const updated_league = await axios.post(`/league/sync`, {
