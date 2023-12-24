@@ -10,6 +10,8 @@ const StartersBench = ({ secondaryTable }) => {
     const { username, type1, type2 } = useSelector(state => state.user);
     const { page, itemActive, searched, filters, playerLineupDict, sortBy, playoffs, week } = useSelector(state => state.lineups);
 
+    console.log({ sortBy })
+
     const players_headers = [
         [
             {
@@ -38,11 +40,13 @@ const StartersBench = ({ secondaryTable }) => {
             {
                 text: 'Proj',
                 colSpan: 1,
+                onClick: () => dispatch(setStateLineups({ sortBy: 'projection' })),
                 className: 'half'
             },
             {
                 text: 'Actual',
                 colSpan: 1,
+                onClick: () => dispatch(setStateLineups({ sortBy: 'stats' })),
                 className: 'half'
             },
             {
@@ -86,22 +90,24 @@ const StartersBench = ({ secondaryTable }) => {
                 filters.draftClass === 'All' || parseInt(filters.draftClass) === (state.league_season - allplayers[parseInt(player_id)]?.years_exp)
             )
         ))
-        ?.sort((a, b) => filterLeagues(playerLineupDict[b][sortBy], type1, type2)
-            ?.filter(l => !playoffs || (
-                l.settings.winners_bracket
-                    .find(
-                        wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
-                            && (
-                                wb.t1 === l.userRoster.roster_id
-                                || wb.t2 === l.userRoster.roster_id
-                            )
-                            && (
-                                !wb.p
-                                || wb.p === 1
-                            )
-                    )
+        ?.sort((a, b) => ['projection', 'stats'].includes(sortBy)
+            ? (projections?.[week]?.[b]?.[sortBy]?.pts_ppr || 0) - (projections?.[week]?.[a]?.[sortBy]?.pts_ppr || 0)
+            : filterLeagues(playerLineupDict[b][sortBy], type1, type2)
+                ?.filter(l => !playoffs || (
+                    l.settings.winners_bracket
+                        .find(
+                            wb => (wb.r === (state.week - l.settings.playoff_week_start + 1))
+                                && (
+                                    wb.t1 === l.userRoster.roster_id
+                                    || wb.t2 === l.userRoster.roster_id
+                                )
+                                && (
+                                    !wb.p
+                                    || wb.p === 1
+                                )
+                        )
 
-            ))?.length
+                ))?.length
             -
             filterLeagues(playerLineupDict[a][sortBy], type1, type2)
                 ?.filter(l => !playoffs || (
