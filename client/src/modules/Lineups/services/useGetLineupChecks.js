@@ -132,8 +132,8 @@ const useGetLineupChecks = () => {
 
             setTimeout(() => {
                 fetchProjectionInterval = setInterval(() => {
-                  //  dispatch(fetchCommon('schedule'))
-                   // dispatch(fetchCommon('projections'))
+                    dispatch(fetchCommon('schedule'))
+                    dispatch(fetchCommon('projections'))
                 }, 1 * 60 * 1000)
             }, delay)
 
