@@ -39,7 +39,6 @@ const LineupCheck = ({
         dispatch(setStateLineups({ itemActive2: '' }))
     }, [])
 
-    console.log({ lineup_check })
     const oppRoster = league?.rosters.find(r => r.roster_id === matchup_opp?.roster_id);
 
     const active_player = lineup_check?.find(x => `${x.slot}_${x.index}` === itemActive2)?.current_player
@@ -124,7 +123,126 @@ const LineupCheck = ({
         }
     }
 
-    const lineup_headers = [
+    const getHeaders = (roster, league, matchup, optimal, proj_actual, proj_optimal, proj_median = false) => {
+        return [
+            [
+                proj_median 
+                ? {
+                    text: week < league.settings.playoff_week_start && parseFloat(proj_median)
+                        ? <p className="median score">{proj_median.toFixed(2)}</p>
+                        : null,
+                    colSpan: 6,
+                    className: 'half'
+                }
+                : '',
+                {
+                    text: <p
+                        className="stat check"
+                        style={getTrendColor(-((roster.rank / league.rosters.length) - .5), .0025)}
+                    >
+                        {roster.rank}
+                        <span className="small">
+                            {
+                                roster.rank === 1
+                                    ? 'st'
+                                    : roster.rank === 2
+                                        ? 'nd'
+                                        : roster.rank === 3
+                                            ? 'rd'
+                                            : 'th'
+                            }
+                        </span>
+                    </p>,
+                    colSpan: 6,
+                    className: 'half'
+                },
+                {
+                    text: (
+                        (secondaryContent1 === 'Lineup' && league.settings.best_ball !== 1)
+                            ? <div className="flex">
+                                <p className="score">
+                                    {
+                                        (matchup?.starters || [])
+                                            .reduce(
+                                                (acc, cur) => acc + getPlayerScore([projections[week][cur]], league.scoring_settings, true),
+                                                0
+                                            )
+                                            ?.toFixed(2)
+                                    }
+                                </p>
+                                <em className="score">
+                                    {proj_actual?.toFixed(2)}
+                                </em>
+                            </div>
+                            : (secondaryContent1 === 'Optimal' || league.settings.best_ball === 1)
+                                ? <div className="flex">
+                                    <p className="score">
+                                        {
+                                            (optimal || [])
+                                                .reduce(
+                                                    (acc, cur) => acc + getPlayerScore([projections[week][cur.player]], league.scoring_settings, true),
+                                                    0
+                                                )
+                                                ?.toFixed(2)
+                                        }
+                                    </p>
+                                    <em className="score">
+                                        {proj_optimal?.toFixed(2)}
+                                    </em>
+                                </div>
+                                : ''
+                    ),
+                    colSpan: 11,
+                    className: 'half'
+                },
+                {
+                    text: '',
+                    colSpan: 6,
+                    className: 'half'
+                }
+            ],
+            [
+                {
+                    text: 'Slot',
+                    colSpan: 3,
+                    className: 'half'
+                },
+                {
+                    text: 'Player',
+                    colSpan: 10,
+                    className: 'half'
+                },
+                {
+                    text: 'Opp',
+                    colSpan: 3,
+                    className: 'half'
+                },
+                {
+                    text: <div className="flex">
+                        <p>Pts</p>
+                        {
+                            rankings
+                                ? <p>
+                                    Rank
+                                </p>
+                                : <em>
+                                    Proj
+                                </em>
+                        }
+                    </div>,
+                    colSpan: 7,
+                    className: 'half'
+                }
+            ]
+        ]
+    }
+
+    const lineup_headers = getHeaders(league.userRoster, league, matchup_user, optimal_lineup, proj_score_user_actual, proj_score_user_optimal);
+
+    const lineup_headers_opp = getHeaders(oppRoster, league, matchup_opp, optimal_lineup_opp, proj_score_opp_actual, proj_score_opp_optimal);
+
+/*    
+    [
         [
             {
                 text: <p
@@ -226,7 +344,7 @@ const LineupCheck = ({
             }
         ]
     ]
-    console.log({ itemActive2 })
+*/   
 
     const lineup_body = (secondaryContent1 === 'Lineup' && league.settings.best_ball !== 1)
         ? lineup_check?.map((slot, index) => {
@@ -408,7 +526,9 @@ const LineupCheck = ({
                         ? suboptimal_options = suboptimal_options.filter(player_id => ['WR', 'TE'].includes(allplayers[player_id]?.position))
                         : suboptimal_options = suboptimal_options.filter(player_id => allplayers[player_id]?.position === itemActive2.split('__')[0])
     }
-    const subs_headers = [
+    const subs_headers = lineup_headers_opp
+/*    
+    [
         [
             {
                 text: week < league.settings.playoff_week_start && parseFloat(proj_median)
@@ -517,7 +637,7 @@ const LineupCheck = ({
             }
         ]
     ]
-
+*/
     const subs_body = itemActive2
         ? itemActive2.includes('__')
             ? suboptimal_options
